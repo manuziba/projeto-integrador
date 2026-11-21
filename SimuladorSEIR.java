@@ -4,19 +4,11 @@ import java.util.Scanner;
 public class SimuladorSEIR {
 
 	public static void main(String[] args) {
-<<<<<<< HEAD
 		double infectadosIniciais = 0;
 		double alfa = 0.27;
 		double sigma = 0.71;
 		double beta = 0.21;
 		int diasDeSimulacao = 0;
-=======
-		double infectadosIniciais = 5;
-		double alfa = 0.27;
-		double sigma = 0.71;
-		double beta = 0.21;
-		int diasDeSimulacao = 300;
->>>>>>> c8d4a2ca4403340140e2fc248b0556612158549c
 
 		double[][][] tabela = {
 			{//cantina, sala conv, patio, corredor baixo, bibliotca, corredor cima, quadra
@@ -58,7 +50,6 @@ public class SimuladorSEIR {
 		};
 		double[] tamanhos = {33, 36, 34, 31, 33, 30, 28, 20, 35, 30};
 		String[] nomes = {"Info 1", "Info 2", "Info 3", "Info 4", "Agro 1","Agro 2", "Agro 3", "Agro 4", "Adm 1", "Adm 2"};
-<<<<<<< HEAD
 		
 		Scanner sc = new Scanner(System.in);
 
@@ -115,37 +106,14 @@ public class SimuladorSEIR {
 		for (int a = 0; a < 10; a++) {
 			double inf = 0;
 			if (a == indiceTurma) {
-=======
-
-		// matriz de contato final
-		MatrizesContato obj = new MatrizesContato(tabela);
-		obj.tamanhoTurma = tamanhos;
-		double[][] media = obj.mediaTabelas();
-		double[] totalLocal = obj.totalPorLocal(media);
-		double[] sala = obj.naSala(media);
-		double[][] contato = obj.proporcaoContato(media, totalLocal, sala);
-		double[][] matriz = obj.proporcaoComTempo(contato);
-
-		// as 10 turmas (os infectados iniciais ficam só na Info 1(por enquanto))
-		List<Populacao> turmas = new ArrayList<>();
-		for (int a = 0; a < 10; a++) {
-			double inf = 0;
-			if (a == 0) {
->>>>>>> c8d4a2ca4403340140e2fc248b0556612158549c
 				inf = infectadosIniciais;
 			}
 			turmas.add(new Populacao(nomes[a], tamanhos[a] - inf, 0, inf, 0, sigma, beta));
 		}
 
 		Simulador simulador = new Simulador(diasDeSimulacao, alfa, matriz);
-<<<<<<< HEAD
 		simulador.rodar(turmas);
 
-=======
-		List<RegistroDiario> historico = simulador.rodar(turmas);
-
-		simulador.imprimirResultados(historico);
->>>>>>> c8d4a2ca4403340140e2fc248b0556612158549c
 	}
 }
 
@@ -194,25 +162,6 @@ class Populacao {
     }
 }
 
-<<<<<<< HEAD
-=======
-class RegistroDiario {
-    int dia;
-    double s;
-    double e;
-    double i;
-    double r;
-
-    public RegistroDiario(int dia, double s, double e, double i, double r) {
-        this.dia = dia;
-        this.s = s;
-        this.e = e;
-        this.i = i;
-        this.r = r;
-    }
-}
-
->>>>>>> c8d4a2ca4403340140e2fc248b0556612158549c
 
 class Simulador {
 	
@@ -248,7 +197,6 @@ class Simulador {
     }
 
 
-<<<<<<< HEAD
     void rodar(List<Populacao> turmas) {
         imprimirTurmas(0, turmas);
 
@@ -257,18 +205,8 @@ class Simulador {
             if (dia % 7 == 0) {
                 imprimirTurmas(dia, turmas);
             }
-=======
-    List<RegistroDiario> rodar(List<Populacao> turmas) {
-        List<RegistroDiario> historico = new ArrayList<>();
-        historico.add(totalDaEscola(0, turmas));
-
-        for (int dia = 1; dia <= totalDeDias; dia++) {
-            passarUmDia(turmas);
-            historico.add(totalDaEscola(dia, turmas));
->>>>>>> c8d4a2ca4403340140e2fc248b0556612158549c
         }
     }
-<<<<<<< HEAD
     
     // mostra S, E, I, R de cada turma em um dia
     public void imprimirTurmas(int dia, List<Populacao> turmas) {
@@ -277,31 +215,6 @@ class Simulador {
         for (int a = 0; a < turmas.size(); a++) {
             Populacao t = turmas.get(a);
             System.out.printf("%-8s %-7.1f %-7.1f %-7.1f %-7.1f%n", t.nome, t.s, t.e, t.i, t.r);
-=======
-
-    RegistroDiario totalDaEscola(int dia, List<Populacao> turmas) {
-        double s = 0;
-        double e = 0;
-        double i = 0;
-        double r = 0;
-
-        for (int a = 0; a < turmas.size(); a++) {
-            s = s + turmas.get(a).s;
-            e = e + turmas.get(a).e;
-            i = i + turmas.get(a).i;
-            r = r + turmas.get(a).r;
-        }
-
-        return new RegistroDiario(dia, s, e, i, r);
-    }
-
-        public void imprimirResultados(List<RegistroDiario> historico) {
-        System.out.printf("%-5s %-9s %-9s %-9s %-9s%n", "Dia", "S", "E", "I", "R");
-        for (int k = 0; k < historico.size(); k++) {
-            RegistroDiario registro = historico.get(k);
-            System.out.printf("%-5d %-9.1f %-9.1f %-9.1f %-9.1f%n",
-                    registro.dia, registro.s, registro.e, registro.i, registro.r);
->>>>>>> c8d4a2ca4403340140e2fc248b0556612158549c
         }
         System.out.println();
     }
