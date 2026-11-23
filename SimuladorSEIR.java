@@ -83,14 +83,14 @@ public class SimuladorSEIR {
         }
         double totalNaTurma = tamanhos[indiceTurma];
 
-        while (infectadosIniciais < 1 || infectadosIniciais > totalNaTurma) {
-            System.out.println("Quantos infectados iniciais nessa turma? (1 a " + totalNaTurma + ")");
-            infectadosIniciais = sc.nextInt();
-            
-            if (infectadosIniciais < 1 || infectadosIniciais > totalNaTurma) {
-				System.out.println("Número inválido. Digite um valor entre 1 e " +totalNaTurma + ".");
+        while (infectadosIniciais < 1 || infectadosIniciais > totalNaTurma - 1) {
+			System.out.println("Quantos infectados iniciais nessa turma? (1 a " + (totalNaTurma - 1) + ")");
+			infectadosIniciais = sc.nextInt();
+
+			if (infectadosIniciais < 1 || infectadosIniciais > totalNaTurma - 1) {
+				System.out.println("Número inválido. Digite um valor entre 1 e " + (totalNaTurma - 1) + ".");
 			}
-        }
+		}
 
 		// matriz de contato final
 		MatrizesContato obj = new MatrizesContato(tabela);
@@ -125,6 +125,9 @@ class Populacao {
     double r;   // recuperados
     double sigma;
     double beta;
+    double sInicial; // suscetíveis no começo (para a taxa de ataque)
+    double picoI; // maior número de infectados até agora
+    int diaPico; // dia em que aconteceu esse maior número
 
     public Populacao(String nome, double s, double e, double i, double r, double sigma, double beta) {
         this.nome = nome;
@@ -134,6 +137,21 @@ class Populacao {
         this.r = r;
         this.sigma = sigma;
         this.beta = beta;
+        this.sInicial = s;
+        this.picoI = i;
+        this.diaPico = 0;
+    }
+    
+    // se hoje tem mais infectados que o pico anterior guarda o novo pico
+    public void verificarPico(int dia) {
+        if (i > picoI) {
+            picoI = i;
+            diaPico = dia;
+        }
+    }
+
+    public double taxaDeAtaque() {
+        return (sInicial - s) / sInicial;
     }
 
     public double populacaoTotal() {
@@ -200,12 +218,31 @@ class Simulador {
     void rodar(List<Populacao> turmas) {
         imprimirTurmas(0, turmas);
 
+        double picoEscola = 0;
+        int diaPicoEscola = 0;
+        for (int a = 0; a < turmas.size(); a++) {
+            picoEscola = picoEscola + turmas.get(a).i;
+        }
+
         for (int dia = 1; dia <= totalDeDias; dia++) {
             passarUmDia(turmas);
+
+            double infectadosEscola = 0;
+            for (int a = 0; a < turmas.size(); a++) {
+                turmas.get(a).verificarPico(dia);
+                infectadosEscola = infectadosEscola + turmas.get(a).i;
+            }
+            if (infectadosEscola > picoEscola) {
+                picoEscola = infectadosEscola;
+                diaPicoEscola = dia;
+            }
+
             if (dia % 7 == 0) {
                 imprimirTurmas(dia, turmas);
             }
         }
+
+        imprimirResumo(turmas, picoEscola, diaPicoEscola);
     }
     
     // mostra S, E, I, R de cada turma em um dia
@@ -217,6 +254,25 @@ class Simulador {
             System.out.printf("%-8s %-7.1f %-7.1f %-7.1f %-7.1f%n", t.nome, t.s, t.e, t.i, t.r);
         }
         System.out.println();
+    }
+    
+    // pico de infectados, dia do pico e taxa de ataque de cada turma e da escola
+    public void imprimirResumo(List<Populacao> turmas, double picoEscola, int diaPicoEscola) {
+        double sInicialEscola = 0;
+        double sFinalEscola = 0;
+
+        System.out.println("===== RESUMO =====");
+        System.out.printf("%-8s %-8s %-9s %-7s%n", "Turma", "Pico I", "Dia pico", "Ataque");
+        for (int a = 0; a < turmas.size(); a++) {
+            Populacao t = turmas.get(a);
+            System.out.printf("%-8s %-8.1f %-9d %.1f%%%n", t.nome, t.picoI, t.diaPico, t.taxaDeAtaque() * 100);
+            sInicialEscola = sInicialEscola + t.sInicial;
+            sFinalEscola = sFinalEscola + t.s;
+        }
+        double ataqueEscola = (sInicialEscola - sFinalEscola) / sInicialEscola;
+        System.out.printf("%-8s %-8.1f %-9d %.1f%%%n", "ESCOLA", picoEscola, diaPicoEscola, ataqueEscola * 100);
+        System.out.println();
+        System.out.printf("Pico da escola: dia %d, com %.1f infectados ao mesmo tempo.%n", diaPicoEscola, picoEscola);
     }
 }
 class MatrizesContato {
